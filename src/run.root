@@ -1,0 +1,25 @@
+#!/bin/bash
+PROV_DIR="/var/hadoop/provsioning/run.onprovisioning"
+RUN_DIR="/var/hadoop/provsioning/run.onboot"
+OS_DIST=`cat /etc/issue | head -n 1 | awk '{print $1}'`
+
+if [[ -d "${PROV_DIR}" ]]; then
+  cd ${PROV_DIR}
+  for file in ${PROV_DIR}/${OS_DIST}_*.sh
+  do
+    echo "############# execute ${file} / Run Provisioning ###############"
+    bash ${file} >> /var/log/run_on_provisioning.log 2>> /var/log/run_on_provisioning.err
+    rm -f ${file}
+  done
+  cd /
+  rm -rf ${PROV_DIR}
+  reboot
+  exit 0
+fi
+
+for file in ${RUN_DIR}/*.sh
+do
+  cd ${RUN_DIR}
+  echo "############# execute ${file} / Run On Boot ###############"
+  bash ${file} >> /var/log/run_on_boot.log 2>> /var/log/run_on_boot.err
+done

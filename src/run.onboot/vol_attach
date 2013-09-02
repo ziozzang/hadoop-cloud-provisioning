@@ -1,0 +1,35 @@
+#!/bin/bash
+OS_DIST=`cat /etc/issue | head -n 1 | awk '{print $1}'`
+# KT uCloudBiz
+TARGET_DEVICE="/dev/xvd?"
+
+IDS=0
+
+for disk in ${TARGET_DEVICE}
+do
+  # Check Already Partioned
+  if [[ -e ${disk}1 ]]; then
+    echo "==> ${disk}1 partition already exist"
+    continue
+  else
+    let IDS=$IDS+1
+    echo "==> ${disk} is not partioned"
+    echo "==> Create MBR label"
+    parted -s ${disk} mklabel msdos
+    ncyl=$(parted ${disk} unit cyl print  | sed -n 's/.*: \([0-9]*\)cyl/\1/p')
+    parted -a optimal ${disk} mkpart primary 0cyl ${ncyl}cyl
+    /sbin/mkfs -t ext3 ${disk}1
+    mkdir -p /data${IDS}
+    e2label ${disk}1 /data${IDS}
+
+    cat >> /etc/fstab << EOF
+# Expand Area - ${disk}1 as /data${IDS}
+LABEL=/data${IDS}  /data${IDS}  ext3  defaults   1 2
+EOF
+    mount /data${IDS}
+  fi
+done
+
+# Exit Code will say how many partioned.
+exit ${IDS}
+
