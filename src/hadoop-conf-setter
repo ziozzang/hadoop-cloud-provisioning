@@ -116,14 +116,14 @@ class Dict2XML(object):
         if isinstance(d.itervalues().next(), list):
             raise ValueError('Dictionary must not be a map to list: %r' % d)
 
-        xml_list = ['<?xml version="1.0" encoding="UTF-8" ?>\n']
+        xml_list = ['<?xml version="1.0" encoding="UTF-8" ?>\n<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>\n']
         xml_list.append(self.__tostring_helper(d))
         res = ''.join(xml_list)
 
         if wrap:
             res = xml.dom.minidom.parseString(res).toprettyxml().\
                   replace(u'<?xml version="1.0" ?>',
-                          u'<?xml version="1.0" encoding="UTF-8"?>')
+                          u'<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>')
             text_re = re.compile('>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
             res = text_re.sub('>\g<1></', res)
         return res
