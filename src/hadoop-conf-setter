@@ -160,14 +160,31 @@ class Dict2XML(object):
 # ===================================================================
 def fixval(filename, name, value, desc=None):
   p = XML2Dict().parse(filename)
-  q = p["configuration"]["property"]
+  try:
+    q = p["configuration"]["property"]
+  except:
+    p["configuration"] = {}
+    q = p["configuration"]["property"] = []
+
   found = False
+
+  # None Type.
+  # if property is singlenode, convert into multiple node.
+  if type(q) is not type([]):
+    m = [{}]
+    for i in q.keys():
+      m[0][i] = q[i]
+    q = m
+    p["configuration"]["property"] = q
+
+  # values convert.
   for i in range(len(q)):
     if q[i]["name"] == name:
       q[i]["value"] = value
       if desc is not None:
         q[i]["description"] = desc
       found = True
+
   if not found:
     r = {}
     r["name"] = name
@@ -175,7 +192,10 @@ def fixval(filename, name, value, desc=None):
     if desc is not None:
       r["description"] = desc
     q.append(r)
+
+  # encode into XML.
   r = Dict2XML().tostring(p, wrap=True)
+
   open(filename, "w").write(r)
 
 if __name__ == '__main__':
