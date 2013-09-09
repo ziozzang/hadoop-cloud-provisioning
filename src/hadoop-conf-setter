@@ -123,7 +123,7 @@ class Dict2XML(object):
         if wrap:
             res = xml.dom.minidom.parseString(res).toprettyxml().\
                   replace(u'<?xml version="1.0" ?>',
-                          u'<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>')
+                          u'<?xml version="1.0" encoding="UTF-8"?>')
             text_re = re.compile('>\n\s+([^<>\s].*?)\n\s+</', re.DOTALL)
             res = text_re.sub('>\g<1></', res)
         return res
