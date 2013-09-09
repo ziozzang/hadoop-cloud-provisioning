@@ -7,6 +7,7 @@ Hadoop Configuration Fixer by Jioh L. Jung <ziozzang@gmail.com>
 
 from __future__ import with_statement
 import re
+import os
 import xml.dom.minidom
 
 try:
@@ -158,32 +159,36 @@ class Dict2XML(object):
 
 
 # ===================================================================
+DEFAULT_PREFIX='/etc/hadoop/'
+
 def fixval(filename, name, value, desc=None):
+  found = False
+
   p = XML2Dict().parse(filename)
+
   try:
     q = p["configuration"]["property"]
+    # None Type.
+    # if property is singlenode, convert into multiple node.
+    if type(q) is not type([]):
+      m = [{}]
+      for i in q.keys():
+        m[0][i] = q[i]
+      q = m
+      p["configuration"]["property"] = q
+
+    # values convert.
+    for i in range(len(q)):
+      if q[i]["name"] == name:
+        q[i]["value"] = value
+        if desc is not None:
+          q[i]["description"] = desc
+        found = True
+        break
+
   except:
     p["configuration"] = {}
     q = p["configuration"]["property"] = []
-
-  found = False
-
-  # None Type.
-  # if property is singlenode, convert into multiple node.
-  if type(q) is not type([]):
-    m = [{}]
-    for i in q.keys():
-      m[0][i] = q[i]
-    q = m
-    p["configuration"]["property"] = q
-
-  # values convert.
-  for i in range(len(q)):
-    if q[i]["name"] == name:
-      q[i]["value"] = value
-      if desc is not None:
-        q[i]["description"] = desc
-      found = True
 
   if not found:
     r = {}
@@ -206,9 +211,14 @@ if __name__ == '__main__':
   if len(sys.argv) < 4:
     print "Usage)\n$ %s filename property_name property_value (description)" % sys.argv[0]
   else:
+    f = sys.argv[1]
+    if not os.path.isfile(f):
+      f = DEFAULT_PREFIX + f
+      if not os.path.isfile(f):
+        f = f + ".xml"
     n = sys.argv[2]
     v = sys.argv[3]
     d = None
     if len(sys.argv) > 4:
       d = sys.argv[4]
-    fixval(sys.argv[1], n, v, desc=d)
+    fixval(f, n, v, desc=d)
