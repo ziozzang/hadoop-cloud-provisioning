@@ -24,9 +24,11 @@ TOTAL_MEM_KB=$(awk '/MemTotal:/ { print $2 }' /proc/meminfo)
 let TARGET_HEAP_MB=(${TOTAL_MEM_KB}*${USAGE_PERCENT}/100)/1024
 
 if [[ -f "${USER_DATA}" ]]; then
-  rm -f ${USER_DATA}
+  rm -f ${USER_DATA}.org
 fi
-wget -O ${USER_DATA} http://${META_IP}/latest/user-data
+wget -O ${USER_DATA}.org http://${META_IP}/latest/user-data
+grep -v "hadoop-conf-setter" ${USER_DATA}.org > ${USER_DATA}
+grep "hadoop-conf-setter" ${USER_DATA}.org > ${USER_DATA}.conf
 source ${USER_DATA} || (echo "FATAL: ${USER_DATA} failed"; exit 1)
 
 DISK_COUNT=0
@@ -242,6 +244,10 @@ EOF
 EOF
 
     truncate --size 0 /etc/hadoop/slaves
+    
+    # Execute hadoop-conf-setter
+    bash ${USER_DATA}.conf
+    
     echo "${CURRENT_IP}" > /etc/hadoop/masters
     tar -czvf /var/hadoop/provsioning/conf.tgz /etc/hadoop
     md5sum -b /var/hadoop/provsioning/conf.tgz  | awk '{print $1}' > /var/hadoop/provsioning/conf.md5
