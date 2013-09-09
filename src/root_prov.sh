@@ -11,6 +11,9 @@ if [ "$HADOOP_EXEC" -eq "0" ]; then
   sed -i -e "s,^\(exit\),#\1,g" /etc/rc.local
 fi
 
+chmod +x hadoop-conf-setter
+mv hadoop-conf-setter /usr/bin
+
 mkdir -p /var/hadoop/provsioning
 mv *.py /var/hadoop/provsioning/
 mv run.* /var/hadoop/provsioning/
