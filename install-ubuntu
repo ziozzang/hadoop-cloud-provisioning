@@ -1,0 +1,20 @@
+#!/bin/bash
+
+[[ "$(id -u)" -eq 0 ]] || (echo "FATAL: Root privilege is required."; exit 1)
+
+
+sed -i -e "s,kr\.archive\.ubuntu\.com,ftp\.daum\.net,g" /etc/apt/sources.list
+apt-get update -fy
+apt-get upgrade -fy
+apt-get install -fy git-core curl
+
+sed -i -e "s,ftp\.daum\.net,kr\.archive\.ubuntu\.com,g" /etc/apt/sources.list
+
+cd ~
+git clone https://github.com/ziozzang/hadoop-cloud-provisioning/
+mv hadoop-cloud-provisioning/src/* .
+
+rm -rf hadoop-cloud-provisioning
+
+./root_prov.sh
+
