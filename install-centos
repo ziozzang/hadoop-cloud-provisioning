@@ -1,0 +1,15 @@
+#!/bin/bash
+
+[[ "$(id -u)" -eq 0 ]] || (echo "FATAL: Root privilege is required."; exit 1)
+
+yum update -y
+yum install -y git
+
+cd ~
+git clone https://github.com/ziozzang/hadoop-cloud-provisioning/
+mv hadoop-cloud-provisioning/src/* .
+
+rm -rf hadoop-cloud-provisioning
+
+./root_prov.sh
+
