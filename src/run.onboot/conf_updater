@@ -10,16 +10,17 @@ do
   fi
 
   HASH_NEW=`curl http://${MASTER_IP}:7777/conf-hash/`
+  if [[ "$?" -eq "0" ]]; then
 
-  if [[ "${HASH_OLD}" != "${HASH_NEW}" ]]; then
-    echo "${HASH_NEW}" > /var/hadoop/provsioning/conf.md5
-    wget -O /var/hadoop/provsioning/conf.tgz http://${MASTER_IP}:7777/conf-data/
-    if [[ -f /var/hadoop/provsioning/conf.tgz ]]; then
-      tar -xzvf /var/hadoop/provsioning/conf.tgz
-      mv -f etc/hadoop/* /etc/hadoop/
+    if [[ "${HASH_OLD}" != "${HASH_NEW}" ]]; then
+      echo "${HASH_NEW}" > /var/hadoop/provsioning/conf.md5
+      wget -O /var/hadoop/provsioning/conf.tgz http://${MASTER_IP}:7777/conf-data/
+      if [[ -f /var/hadoop/provsioning/conf.tgz ]]; then
+        tar -xzvf /var/hadoop/provsioning/conf.tgz
+        mv -f etc/hadoop/* /etc/hadoop/
+      fi
     fi
   fi
-
   sleep 10
 
 done
