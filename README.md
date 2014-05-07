@@ -2,7 +2,7 @@ hadoop-cloud-provisioning
 =========================
 
 KT ucloud Hadoop service Automatically Provisioning.
-
+This code is used to build KT uCloud MR(Hadoop) Service.
 
 
 
